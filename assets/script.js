@@ -69,4 +69,44 @@ function getTodaysWeather(cityName) {
     $("#current-weather").append("<div>" + city + "</div>");
     fiveDayForcast = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}`;
 
-    
+    $.ajax({
+      url: fiveDayForcast,
+      method: "GET",
+    }).then(function (response) {
+      console.log(response);
+
+      var averageTemp = 0;
+      var previousdate = "";
+      previousdate = moment().format("MM/DD/YYYY");
+      for (let index = 0; index < response.list.length; index++) {
+        var currentDate = moment(response.list[index].dt, "X").format(
+          "MM/DD/YYYY"
+        );
+        var temp = response.list[index].main.temp;
+        temp = (temp - 273.15) * 1.8 + 32;
+        temp = Math.floor(temp);
+        console.log(currentDate);
+        console.log(temp);
+
+        if (previousdate === currentDate) {
+          averageTemp = averageTemp + temp;
+          count++;
+          previousdate = currentDate;
+        } else {
+          results = averageTemp / count;
+          results = Math.floor(results);
+          console.log("results:", results);
+          var card = $("<div class = 'card col-sm-2'>");
+
+          var div1 = $("<div class= 'card-header'>");
+          div1.append("Date" + "" + currentDate);
+          card.append(div1);
+
+          var div2 = $("<div class= 'card-body'>");
+          div2.append("Average Temperature:" + results);
+          card.append(div2);
+        }
+      }
+    });
+  });
+}
