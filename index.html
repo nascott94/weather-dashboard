@@ -15,35 +15,44 @@
   </head>
   <body>
     <header>Weather Dashboard</header>
-    <div class='container'>
-      <div class='row'>
-        <div class='col-sm-4'>
-          <label for='search'><h2>Search for your City</h2></label>
-          <div class='input-group mb-3'>
-            <input type='search' class='form-control' placeholder='Search' id='search'>
-            <div class='input-group-append'>
-              <button class='button'id='search-input' type='button/text'>Search</button> 
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-4">
+          <label for="search"><h2>Search for your City</h2></label>
+          <div class="input-group mb-3">
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Search"
+              id="search"
+            />
+            <div class="input-group-append">
+              <button class="button" id="search-input" type="button/text">
+                Search
+              </button>
             </div>
           </div>
-          <ul id="list">
-          </ul>            
-          <button class='btn-btn-secondary' type='button'>Clear Search History</button>  
-          <div class='search-history'>
-          </div>
+          <ul id="list"></ul>
+          <button class="btn-btn-secondary" id="clear-search" type="button">
+            Clear Search History
+          </button>
+          <div class="search-history"></div>
         </div>
-        <div class='col-md-8'>
+        <div class="col-md-8">
           <div class="d-flex flex-column">
             <div class="p-2" id="current-weather"><h1>Today's Weather</h1></div>
             <div class="p-2"><h1>5 Day Forcast</h1></div>
-            <div id="five-day" class="row" ></div>        
-          </div>             
-        </div>      
+            <div id="five-day" class="row"></div>
+          </div>
+        </div>
       </div>
-      <script
+    </div>
+    <script
       src="https://code.jquery.com/jquery-3.4.1.js"
       integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
-      crossorigin="anonymous"></script>
-      <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
     <script src="assets/script.js"></script>
   </body>
 </html>

@@ -1,50 +1,29 @@
-// var api = " a490b47c0a1078a315f4dc892ba775c1";
-
-// var getTodaysWeather = (searchValue) => {
-//   fetch(
-//     `http://api.openweathermap.org/data/2.5/weather?q=${searchValue}&appid=${api}`
-//   )
-//     .then((res) => res.json())
-//     .then((data) => {
-//       console.log(data); //pull data here from object "windspeed example"
-//       forcast(data.coord.lat, data.coord.lon);
-//     })
-
-//     .catch((err) => console.log(err));
-// };
-
-// var forcast = (lat, lon) => {
-//   fetch(
-//     `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${api}`
-//   )
-//     .then((res) => res.json())
-//     .then((data) => {
-//       console.log(data); //pull data here from object "windspeed example"
-//     })
-
-//     .catch((err) => console.log(err));
-// };
-
-// getTodaysWeather("Denver");
-
 //VARIABLE DECLARATIONS
 var currentConditions =
-  "https://api.openweathermap.org/data/2.5/weather?appid=";
+  "https://api.openweathermap.org/data/2.5/weather?units=imperial&appid=";
 var fiveDayForcast =
-  "https://api.openweathermap.org/data/2.5/forecast?4e5dbe7db2b5e9c8b47fa40b691443d5q={city name},{country code}";
+  "https://api.openweathermap.org/data/2.5/forecast?units=imperial&appid=";
 var uvIndex =
   "https://api.openweathermap.org/data/2.5/uvi?appid={appid}&lat={lat}&lon={lon}";
 var apiKey = "a490b47c0a1078a315f4dc892ba775c1";
 var city = "";
 var searchedArr = JSON.parse(localStorage.getItem("searchedItems")) || [];
 
-// USER INPUTS
+//USER INPUTS
 $(document).ready(function () {
   $("#search-input").on("click", function (event) {
     var userInput = $("#search").val();
     console.log(userInput);
     getTodaysWeather(userInput);
+    getFiveDayWeather(userInput);
+    saveToLocalStorage(userInput);
+    displaySearchHistory();
   });
+});
+
+$("#clear-search").on("click", function () {
+  localStorage.removeItem("SearchHistory");
+  displaySearchHistory();
 });
 
 function getTodaysWeather(cityName) {
@@ -53,60 +32,88 @@ function getTodaysWeather(cityName) {
   if (cityName !== "") {
     apiCall = currentConditions + apiKey + "&q=" + cityName;
   } else {
-    apiCall = currentConditions + apiKey + "&q=" + city;
+    alert("Please enter city name");
+    return;
   }
 
   $.ajax({
     url: apiCall,
     method: "GET",
   }).then(function (response) {
-    console.log(response);
-    var feelslike = response.main.temp;
-    feelslike = (feelslike - 273.15) * 1.8 + 32;
-    feelslike = Math.floor(feelslike);
+    // console.log(response);
+    var feelslike = Math.floor(response.main.temp);
+
     city = response.name;
-    $("#current-weather").append("<div>" + feelslike + "</div>");
-    $("#current-weather").append("<div>" + city + "</div>");
-    fiveDayForcast = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}`;
-
-    $.ajax({
-      url: fiveDayForcast,
-      method: "GET",
-    }).then(function (response) {
-      console.log(response);
-
-      var averageTemp = 0;
-      var previousdate = "";
-      previousdate = moment().format("MM/DD/YYYY");
-      for (let index = 0; index < response.list.length; index++) {
-        var currentDate = moment(response.list[index].dt, "X").format(
-          "MM/DD/YYYY"
-        );
-        var temp = response.list[index].main.temp;
-        temp = (temp - 273.15) * 1.8 + 32;
-        temp = Math.floor(temp);
-        console.log(currentDate);
-        console.log(temp);
-
-        if (previousdate === currentDate) {
-          averageTemp = averageTemp + temp;
-          count++;
-          previousdate = currentDate;
-        } else {
-          results = averageTemp / count;
-          results = Math.floor(results);
-          console.log("results:", results);
-          var card = $("<div class = 'card col-sm-2'>");
-
-          var div1 = $("<div class= 'card-header'>");
-          div1.append("Date" + "" + currentDate);
-          card.append(div1);
-
-          var div2 = $("<div class= 'card-body'>");
-          div2.append("Average Temperature:" + results);
-          card.append(div2);
-        }
-      }
-    });
+    $("#current-weather").empty();
+    $("#current-weather").append("<div> Temp: " + feelslike + "</div>");
+    $("#current-weather").append("<div> Location: " + city + "</div>");
   });
 }
+
+function getFiveDayWeather(cityName) {
+  $.ajax({
+    url: `${fiveDayForcast}${apiKey}&q=${cityName}`,
+    method: "GET",
+  }).then(function (response) {
+    console.log(response);
+
+    var averageTemp = 0;
+    var previousdate = moment().format("MM/DD/YYYY");
+    $("#five-day").empty();
+    for (let index = 0; index < response.list.length; index++) {
+      var currentDate = moment(response.list[index].dt, "X").format(
+        "MM/DD/YYYY"
+      );
+      var temp = Math.floor(response.list[index].main.temp);
+      console.log(currentDate);
+
+      if (previousdate === currentDate) {
+        averageTemp += temp;
+        console.log(averageTemp);
+      } else {
+        previousdate = currentDate;
+        averageTemp = temp;
+      }
+
+      if ((index + 1) % 8 === 0) {
+        var results = Math.floor(averageTemp / 8);
+        var card = $("<div class = 'card col-sm-2'>");
+        var div1 = $("<div class= 'card-header'>");
+        div1.append(`<h2> ${moment(currentDate).format("dddd")} </h2>`);
+        card.append(div1);
+
+        var div2 = $("<div class= 'card-body'>");
+        div2.append(`<p> Average Temp: ${results} </p>`);
+        card.append(div2);
+
+        $("#five-day").append(card);
+      }
+    }
+  });
+}
+
+function saveToLocalStorage(cityName) {
+  var itemsFromStorage = localStorage.getItem("SearchHistory");
+  if (itemsFromStorage) {
+    var updatedItems = JSON.parse(itemsFromStorage);
+    updatedItems.push(cityName);
+    localStorage.setItem("SearchHistory", JSON.stringify(updatedItems));
+  } else {
+    localStorage.setItem("SearchHistory", JSON.stringify([cityName]));
+  }
+}
+
+function displaySearchHistory() {
+  var itemsFromStorage = localStorage.getItem("SearchHistory");
+  if (itemsFromStorage) {
+    var history = JSON.parse(itemsFromStorage);
+    $(".search-history").empty();
+    history.forEach((city) => {
+      $(".search-history").append(`<p> ${city} </p>`);
+    });
+  } else {
+    $(".search-history").empty();
+  }
+}
+
+displaySearchHistory();
